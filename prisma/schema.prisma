@@ -29,6 +29,11 @@ model User {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   status Boolean @default(true)
+
+  sessions Session[]
+
+  @@map("users")
+  @@index([username])
 }
 
 model Session {
@@ -36,4 +41,8 @@ model Session {
   user_id String
   exp_at DateTime
   created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id],references: [id])
+
+  @@map("sessions")
 }
