@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDto } from './dto/sign-in';
 import { UsersService } from 'src/users/users.service';
-import { expiryAt, verifyPassword } from 'src/utils/authauth';
+import { expiryAt, verifyPassword } from '../utils/auth';
 import { DbService } from 'src/db/db.service';
 
 @Injectable()
@@ -66,6 +66,15 @@ export class AuthService {
                 user: { id: userId, name, role }
             }
 
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async logout(sessinId: string) {
+        try {
+            const deleted = await this.db.session.delete({ where: { id: sessinId } })
+            return deleted
         } catch (error) {
             throw error
         }
