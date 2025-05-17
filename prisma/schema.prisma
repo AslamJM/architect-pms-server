@@ -31,6 +31,9 @@ model User {
   status Boolean @default(true)
 
   sessions Session[]
+  uploads Upload[]
+  projects_assigned_to Project[] @relation("AssignedTo")
+  projects_assigned_by Project[] @relation("AssignedBy")
 
   @@map("users")
   @@index([username])
@@ -45,4 +48,93 @@ model Session {
   user User @relation(fields: [user_id],references: [id])
 
   @@map("sessions")
+}
+
+enum UploadType {
+  UPLOADED_FILES 
+  WORKING_FILES
+  RENDERED_IMAGES
+}
+
+model Upload {
+  id String @id @default(cuid())
+  url String
+  uploaded_at DateTime @default(now())
+  uploaded_by_id String
+  project_id String
+  phase_number Int
+  type UploadType
+  phase Phase @relation(fields: [project_id, phase_number],references: [project_id, phase_number])
+
+  uploaded_by User @relation(fields: [uploaded_by_id],references: [id])
+
+  @@map("uploads")
+}
+
+model TaskImage {
+  id Int @id @default(autoincrement())
+  url String 
+  task_id String
+  task Task @relation(fields: [task_id],references: [id])
+
+  @@map("task_images")
+}
+
+enum TaskType {
+  PRIORITY
+  CLIENT_FEEDBACK
+  ELEMENT
+  ITEM_TO_KEEP
+  ITEM_TO_REMOVE
+  INSPIRATION
+}
+
+model Task {
+  id String @id @default(cuid())
+  content String @db.Text
+  completed Boolean 
+  type TaskType
+  images TaskImage[]
+
+  project_id String
+  project Project @relation(fields: [project_id],references: [id])
+
+  @@map("tasks")
+}
+
+model Project {
+  id String @id @default(cuid())
+  name String
+  description String @db.Text
+
+  tasks Task[]
+  phases Phase[]
+
+  design_notes String @db.Text 
+  assigned_to_id String 
+  assigned_by_id String
+
+  is_completed Boolean @default(false)
+  is_paid Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  assigned_to User @relation("AssignedTo", fields: [assigned_to_id], references: [id])
+  assigned_by User @relation("AssignedBy", fields: [assigned_by_id], references: [id])
+
+  @@map("projects")
+}
+
+model Phase {
+  project_id String 
+  phase_number Int 
+  uploads Upload[]
+  verified Boolean @default(false)
+
+  project Project @relation(fields: [project_id], references: [id])
+
+  @@id([project_id, phase_number])
+
+  @@map("phases")
 }
