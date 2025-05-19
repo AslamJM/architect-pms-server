@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UploadsModule } from './uploads/uploads.module';
 import { ProjectsModule } from './projects/projects.module';
 import configuration from './config/configuration';
+import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import configuration from './config/configuration';
     }),
     DbModule, AuthModule, UsersModule, UploadsModule, ProjectsModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, Reflector],
 })
 export class AppModule { }
