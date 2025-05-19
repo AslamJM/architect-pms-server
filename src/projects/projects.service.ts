@@ -99,6 +99,7 @@ export class ProjectsService {
                     tasks: {
                         select: {
                             id: true,
+                            type:true,
                             content: true,
                             completed: true,
                             images: {

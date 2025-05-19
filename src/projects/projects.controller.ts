@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Post, Req, } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { TaskService } from './task.service';
-import { CreateProjectDto, CreateTaskDto } from './dto/create-project';
+import { CreatePhaseDto, CreateProjectDto, CreateTaskDto } from './dto/create-project';
 import { Request } from 'express';
 
 @Controller('projects')
@@ -39,5 +39,13 @@ export class ProjectsController {
         @Param("id") id: string
     ) {
         return await this.taskService.addTaskToProject(id, dto)
+    }
+
+    @Post(":id/phase")
+    async addPhaseProject(
+        @Body() dto: CreatePhaseDto,
+        @Param("id") id: string
+    ) {
+        return await this.projectService.createProjectPhase(id, dto)
     }
 }

@@ -32,4 +32,20 @@ export class TaskService {
             throw error
         }
     }
+
+    async updateTask(taskId: string, update: Prisma.TaskUpdateInput) {
+        try {
+            await this.db.task.update({
+                where: { id: taskId },
+                data: update
+            })
+
+            return {
+                success: true
+            }
+
+        } catch (error) {
+            throw error
+        }
+    }
 }
