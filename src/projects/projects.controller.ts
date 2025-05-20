@@ -26,6 +26,13 @@ export class ProjectsController {
         return await this.projectService.allProjectsAdmin()
     }
 
+    @Get("/user")
+    async getUsersProjects(
+        @Req() req
+    ) {
+        return await this.projectService.allProjectsUser(req.user.id)
+    }
+
     @Get(":id")
     async getOne(
         @Param("id") id: string

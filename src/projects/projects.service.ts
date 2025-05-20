@@ -56,6 +56,18 @@ export class ProjectsService {
         }
     }
 
+    async allProjectsUser(userId: string) {
+        try {
+            const projects = await this.db.project.findMany({
+                where: { assigned_to_id: userId },
+                select: allProjecttSelect
+            })
+            return projects
+        } catch (error) {
+            throw error
+        }
+    }
+
     async createProjectPhase(projectId: string, dto: CreatePhaseDto, userId: string) {
         try {
             const { phase_number, upload_urls } = dto
