@@ -44,8 +44,10 @@ export class ProjectsController {
     @Post(":id/phase")
     async addPhaseProject(
         @Body() dto: CreatePhaseDto,
-        @Param("id") id: string
+        @Param("id") id: string,
+        @Req() req: Request
     ) {
-        return await this.projectService.createProjectPhase(id, dto)
+        //@ts-ignore
+        return await this.projectService.createProjectPhase(id, dto, req.user.id)
     }
 }

@@ -16,5 +16,5 @@ export class CreateTaskDto {
 
 export class CreatePhaseDto {
     phase_number: number
-    upload_ids: string[]
+    upload_urls: string[]
 }

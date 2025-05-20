@@ -56,15 +56,21 @@ export class ProjectsService {
         }
     }
 
-    async createProjectPhase(projectId: string, dto: CreatePhaseDto) {
+    async createProjectPhase(projectId: string, dto: CreatePhaseDto, userId: string) {
         try {
-            const { phase_number, upload_ids } = dto
+            const { phase_number, upload_urls } = dto
             const created = await this.db.phase.create({
                 data: {
                     phase_number,
                     project: { connect: { id: projectId } },
                     uploads: {
-                        connect: upload_ids.map(id => ({ id }))
+                        createMany: {
+                            data: upload_urls.map(url => ({
+                                type: "UPLOADED_FILES",
+                                url,
+                                uploaded_by_id: userId
+                            }))
+                        }
                     }
                 }
             })
@@ -99,7 +105,7 @@ export class ProjectsService {
                     tasks: {
                         select: {
                             id: true,
-                            type:true,
+                            type: true,
                             content: true,
                             completed: true,
                             images: {
