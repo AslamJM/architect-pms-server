@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
 import { DbService } from 'src/db/db.service';
-import { CreatePhaseDto, CreateProjectDto } from './dto/create-project';
+import { CreatePhaseDto, CreateProjectDto, UpdateProjectDetails } from './dto/create-project';
 import { allProjecttSelect } from './dto/db-select';
 
 @Injectable()
@@ -131,8 +131,10 @@ export class ProjectsService {
                             verified: true,
                             uploads: {
                                 select: {
+					id:true,	
                                     type: true,
-                                    url: true
+                                    url: true,
+					uploaded_at:true
                                 }
                             }
                         }
@@ -145,5 +147,28 @@ export class ProjectsService {
         }
     }
 
+
+    async updateProject(id: string, data: UpdateProjectDetails) {
+        try {
+            await this.db.project.update({
+                where: { id },
+                data
+            })
+            return { success: true }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async updateTask(id: string, data: Prisma.TaskUpdateInput) {
+        try {
+            await this.db.task.update({
+                where: { id },
+                data
+            })
+        } catch (error) {
+            throw error
+        }
+    }
 
 }

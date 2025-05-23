@@ -7,6 +7,8 @@ export class CreateProjectDto {
     assigned_to_id: string
 }
 
+
+
 export class CreateTaskDto {
     content: string
     type: TaskType
@@ -18,3 +20,9 @@ export class CreatePhaseDto {
     phase_number: number
     upload_urls: string[]
 }
+
+export type UpdateProjectDetails = Partial<{
+    name: string
+    description: string
+    design_notes: string
+}>

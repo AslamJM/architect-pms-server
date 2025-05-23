@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Post, Req, } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { TaskService } from './task.service';
-import { CreatePhaseDto, CreateProjectDto, CreateTaskDto } from './dto/create-project';
+import { CreatePhaseDto, CreateProjectDto, CreateTaskDto, UpdateProjectDetails } from './dto/create-project';
 import { Request } from 'express';
+import { Prisma } from 'generated/prisma';
 
 @Controller('projects')
 export class ProjectsController {
@@ -57,4 +58,23 @@ export class ProjectsController {
         //@ts-ignore
         return await this.projectService.createProjectPhase(id, dto, req.user.id)
     }
+    @Patch("task/:taskId")
+    async updateTask(
+        @Param("taskId") taskId: string,
+        @Body() dto: Prisma.TaskUpdateInput
+    ) {
+
+        return await this.projectService.updateTask(taskId, dto)
+    }
+
+    @Patch(":id")
+    async updateProject(
+        @Body() dto: UpdateProjectDetails,
+        @Param("id") id: string
+    ) {
+
+        return await this.projectService.updateProject(id, dto)
+
+    }
+
 }
