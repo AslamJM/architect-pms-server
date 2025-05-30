@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req, } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { TaskService } from './task.service';
 import { CreatePhaseDto, CreateProjectDto, CreateTaskDto, UpdateProjectDetails } from './dto/create-project';
 import { Request } from 'express';
 import { Prisma } from 'generated/prisma';
+import { ProjectQuery } from './dto/db-select';
 
 @Controller('projects')
 export class ProjectsController {
@@ -23,15 +24,34 @@ export class ProjectsController {
     }
 
     @Get("/admin")
-    async adminProjects() {
-        return await this.projectService.allProjectsAdmin()
+    async adminProjects(
+        @Query() query: ProjectQuery
+    ) {
+        return await this.projectService.allProjectsAdmin(query)
+    }
+
+    @Get("/pm")
+    async pmProjects(
+        @Req() req,
+        @Query() query: ProjectQuery
+    ) {
+        return await this.projectService.allProjectsPM(req.user.id, query)
+    }
+
+    @Get("/count")
+    async countProjects(
+        @Req() req,
+    ) {
+        //@ts-ignore
+        return await this.projectService.projectCounts(req.user.id, req.user.role)
     }
 
     @Get("/user")
     async getUsersProjects(
-        @Req() req
+        @Req() req,
+        @Query() query: ProjectQuery
     ) {
-        return await this.projectService.allProjectsUser(req.user.id)
+        return await this.projectService.allProjectsUser(req.user.id, query)
     }
 
     @Get(":id")
@@ -58,13 +78,39 @@ export class ProjectsController {
         //@ts-ignore
         return await this.projectService.createProjectPhase(id, dto, req.user.id)
     }
+
+    @Post(":id/verify-phase/:phaseNumber")
+    async verifyPhase(
+        @Body() dto: { verified: boolean },
+        @Param("id") id: string,
+        @Param("phaseNumber") phaseNumber: string,
+    ) {
+        return await this.projectService.verifyPhase(id, parseInt(phaseNumber), dto.verified)
+    }
+
     @Patch("task/:taskId")
     async updateTask(
         @Param("taskId") taskId: string,
         @Body() dto: Prisma.TaskUpdateInput
     ) {
 
-        return await this.projectService.updateTask(taskId, dto)
+        return await this.taskService.updateTask(taskId, dto)
+    }
+
+    @Delete("task-image/:id")
+    async deleteTaskImage(
+        @Param("id", ParseIntPipe) id: number,
+    ) {
+
+        return await this.taskService.deleteTaskImage(id)
+    }
+
+    @Delete("task/:taskId")
+    async deleteTask(
+        @Param("taskId") taskId: string,
+    ) {
+
+        return await this.taskService.deleteTask(taskId)
     }
 
     @Patch(":id")

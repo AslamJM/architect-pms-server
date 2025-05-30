@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Prisma, Role } from 'generated/prisma';
 import { DbService } from 'src/db/db.service';
 import { CreatePhaseDto, CreateProjectDto, UpdateProjectDetails } from './dto/create-project';
-import { allProjecttSelect } from './dto/db-select';
+import { allProjecttSelect, parsePage, parseQuery, ProjectQuery } from './dto/db-select';
 
 @Injectable()
 export class ProjectsService {
@@ -33,10 +33,19 @@ export class ProjectsService {
         }
     }
 
-    async allProjectsAdmin() {
+    async findAll(
+        where: Prisma.ProjectWhereInput,
+        page: number
+    ) {
         try {
+            const take = 12
+            const skip = (page - 1) * take
             const projects = await this.db.project.findMany({
-                select: allProjecttSelect
+                where,
+                take,
+                skip,
+                select: allProjecttSelect,
+                orderBy: { created_at: 'desc' }
             })
             return projects
         } catch (error) {
@@ -44,25 +53,40 @@ export class ProjectsService {
         }
     }
 
-    async allProjectPM(userId: string) {
+    async allProjectsAdmin(query: ProjectQuery) {
         try {
-            const projects = await this.db.project.findMany({
-                where: { assigned_by_id: userId },
-                select: allProjecttSelect
-            })
+
+            const where = parseQuery(query)
+            const projects = this.findAll(where, query.page ? parseInt(query.page) : 1)
             return projects
         } catch (error) {
             throw error
         }
     }
 
-    async allProjectsUser(userId: string) {
+    async allProjectsPM(userId: string, query: ProjectQuery) {
         try {
-            const projects = await this.db.project.findMany({
-                where: { assigned_to_id: userId },
-                select: allProjecttSelect
-            })
+            const where = parseQuery(query)
+            const projects = this.findAll({
+                ...where,
+                assigned_by: { id: userId }
+            }, query.page ? parseInt(query.page) : 1)
             return projects
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async allProjectsUser(userId: string, query: ProjectQuery) {
+        try {
+
+            const where = parseQuery(query)
+            const projects = this.findAll({
+                ...where,
+                assigned_to: { id: userId }
+            }, query.page ? parseInt(query.page) : 1)
+            return projects
+
         } catch (error) {
             throw error
         }
@@ -131,10 +155,10 @@ export class ProjectsService {
                             verified: true,
                             uploads: {
                                 select: {
-					id:true,	
+                                    id: true,
                                     type: true,
                                     url: true,
-					uploaded_at:true
+                                    uploaded_at: true
                                 }
                             }
                         }
@@ -160,11 +184,35 @@ export class ProjectsService {
         }
     }
 
-    async updateTask(id: string, data: Prisma.TaskUpdateInput) {
+    // async verify phase 
+    async verifyPhase(projectId: string, phaseNumber: number, verified: boolean) {
         try {
-            await this.db.task.update({
-                where: { id },
-                data
+            await this.db.phase.update({
+                where: {
+                    project_id_phase_number: {
+                        project_id: projectId,
+                        phase_number: phaseNumber
+                    }
+                },
+                data: { verified }
+            })
+            return { success: true }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async projectCounts(userId: string, role: Role) {
+        try {
+            const where: Prisma.ProjectWhereInput = {}
+            if (role === Role.PROJECT_MANAGER) {
+                where.assigned_by = { id: userId }
+            } else if (role === Role.USER) {
+                where.assigned_to = { id: userId }
+            }
+
+            return await this.db.project.count({
+                where
             })
         } catch (error) {
             throw error

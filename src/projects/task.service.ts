@@ -48,4 +48,22 @@ export class TaskService {
             throw error
         }
     }
+
+    async deleteTask(id: string) {
+        try {
+            await this.db.task.delete({ where: { id } })
+            return { success: true }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async deleteTaskImage(id: number) {
+        try {
+            await this.db.taskImage.delete({ where: { id } })
+            return { success: true }
+        } catch (error) {
+            throw error
+        }
+    }
 }

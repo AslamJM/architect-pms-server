@@ -2,12 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from 'generated/prisma';
 import { DbService } from 'src/db/db.service';
 import { CreateUploadDto } from './dto/create-upload';
+import { writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+
+const uploadDir = join(process.cwd(), 'uploads')
 
 @Injectable()
 export class UploadsService {
     constructor(
         private db: DbService,
     ) { }
+
+    //mock write to uploads dir . 
+    async writeToUploads(dir: string, files: Array<Express.Multer.File>) {
+        for (const f of files) {
+            await writeFile(uploadDir + `/${dir}/${f.originalname}`, f.buffer)
+        }
+
+        return files.map(f => `http://localhost:3000/uploads/${dir}/${f.originalname}`)
+    }
 
     //!TODO implement upload to S3
     async generateSignedUrl(fileName: string) { }
@@ -24,6 +37,12 @@ export class UploadsService {
                     phase_number,
                     type,
                     url
+                },
+                select: {
+                    id: true,
+                    type: true,
+                    url: true,
+                    uploaded_at: true
                 }
             })
         } catch (error) {
@@ -36,6 +55,16 @@ export class UploadsService {
             return await this.db.taskImage.create({
                 data: input
             })
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async remove(id: string) {
+        try {
+            await this.db.upload.delete({ where: { id } })
+            // delete also from cloud storage
+            return { success: true }
         } catch (error) {
             throw error
         }
