@@ -4,6 +4,7 @@ import { DbService } from 'src/db/db.service';
 import { CreateUploadDto } from './dto/create-upload';
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { recentUploadsSelect } from './dto/query';
 
 const uploadDir = join(process.cwd(), 'uploads')
 
@@ -68,5 +69,52 @@ export class UploadsService {
         } catch (error) {
             throw error
         }
+    }
+
+    async getRecentUploadsForAdmin() {
+        const uploads = await this.db.upload.findMany({
+            where: {
+                type: { not: "UPLOADED_FILES" }
+            },
+            select: recentUploadsSelect,
+            take: 5,
+            orderBy: {
+                uploaded_at: "desc"
+            }
+        })
+
+        return uploads.map(up => ({
+            project_id: up.phase.project.id,
+            project_name: up.phase.project.name,
+            uploaded_by: up.uploaded_by.name,
+            uploaded_at: up.uploaded_at,
+            type: up.type
+        }))
+    }
+
+    async getRecentUploadsForPM(userId: string) {
+        const uploads = await this.db.upload.findMany({
+            where: {
+                type: { not: "UPLOADED_FILES" },
+                phase: {
+                    project: {
+                        assigned_by_id: userId
+                    }
+                },
+            },
+            select: recentUploadsSelect,
+            take: 5,
+            orderBy: {
+                uploaded_at: "desc"
+            }
+        })
+
+        return uploads.map(up => ({
+            project_id: up.phase.project.id,
+            project_name: up.phase.project.name,
+            uploaded_by: up.uploaded_by.name,
+            uploaded_at: up.uploaded_at,
+            type: up.type
+        }))
     }
 }

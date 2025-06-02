@@ -11,6 +11,7 @@ import configuration from './config/configuration';
 import { Reflector } from '@nestjs/core';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { join } from 'path';
         index: false
       }
     }),
-    DbModule, AuthModule, UsersModule, UploadsModule, ProjectsModule],
+    DbModule, AuthModule, UsersModule, UploadsModule, ProjectsModule, DashboardModule],
   controllers: [AppController],
   providers: [AppService, Reflector],
 })
