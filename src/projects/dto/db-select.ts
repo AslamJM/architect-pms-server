@@ -20,17 +20,17 @@ export const allProjecttSelect = {
 export type ProjectQuery = {
     name?: string
     page?: string
-    assign_to?: string
+    assigned_to?: string
     is_completed?: string
     assigned_by?: string
     is_paid?: string
 }
 
 export function parseQuery(query: ProjectQuery) {
-    const { name, assign_to, is_completed, assigned_by, is_paid } = query
+    const { name, assigned_to, is_completed, assigned_by, is_paid } = query
     const where: Prisma.ProjectWhereInput = {
         ...(name && { name: { contains: name, mode: "insensitive" } }),
-        ...(assign_to && { assigned_to: { id: assign_to } }),
+        ...(assigned_to && { assigned_to: { id: assigned_to } }),
         ...(is_completed !== undefined && { is_completed: is_completed === "true" ? true : false }),
         ...(assigned_by && { assigned_by: { id: assigned_by } }),
         ...(is_paid !== undefined && { is_paid: is_paid === "true" ? true : false })
