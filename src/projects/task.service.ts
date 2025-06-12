@@ -49,6 +49,26 @@ export class TaskService {
         }
     }
 
+    async addMoreTaskImages(taskId: string, urls: string[]) {
+        try {
+            const updated = await this.db.task.update({
+                where: { id: taskId },
+                data: {
+                    images: {
+                        createMany: {
+                            data: urls.map(url => ({ url }))
+                        }
+                    }
+                }
+            })
+            return {
+                success: true
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
     async deleteTask(id: string) {
         try {
             await this.db.task.delete({ where: { id } })

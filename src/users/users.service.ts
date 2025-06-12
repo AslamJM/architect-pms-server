@@ -28,6 +28,24 @@ export class UsersService {
         }
     }
 
+    async updateUser(id: string, input: Prisma.UserUpdateInput) {
+        try {
+            if (input.password && typeof input.password === "string") {
+                const hashed = await hashPassword(input.password)
+                input = { ...input, password: hashed }
+            }
+
+            await this.db.user.update({
+                where: { id },
+                data: input
+            })
+
+            return { success: true }
+        } catch (error) {
+            throw error
+        }
+    }
+
     async getByUsername(username: string) {
         return await this.db.user.findUnique({ where: { username } })
     }

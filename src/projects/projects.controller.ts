@@ -61,6 +61,14 @@ export class ProjectsController {
         return await this.projectService.getSingle(id)
     }
 
+    @Post("task/:taskId/images")
+    async addMoreImages(
+        @Body() { urls }: { urls: string[] },
+        @Param("taskId") taskId: string
+    ) {
+        return await this.taskService.addMoreTaskImages(taskId, urls)
+    }
+
     @Post(":id/task")
     async addTaskToProject(
         @Body() dto: CreateTaskDto,

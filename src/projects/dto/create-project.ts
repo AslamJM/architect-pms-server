@@ -26,3 +26,4 @@ export type UpdateProjectDetails = Partial<{
     description: string
     design_notes: string
 }>
+
